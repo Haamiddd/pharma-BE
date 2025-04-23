@@ -8,5 +8,6 @@ router.put('/updateorder/:id', orderController.updateOrderById);
 router.delete('/deleteorder/:id', orderController.deleteOrderById);
 router.get('/ordercount/:pharmacyId', orderController.getOrderCountByPharmacyId);
 router.get("/user/:userId", orderController.getOrdersByUserId);
+router.get("/getDispacthedOrders/:pharmacyId", orderController.getTotalSalesDispatchedByDayForPharmacy);
 
 module.exports = router;

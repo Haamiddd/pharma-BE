@@ -148,3 +148,52 @@ exports.getTotalSalesDispatched = async (req, res) => {
     res.status(500).json({ message: 'Internal server error.' });
   }
 };
+
+exports.getTotalSalesDispatchedByDayForPharmacy = async (req, res) => {
+  try {
+    const { pharmacyId } = req.params;
+
+    const totalSalesDispatchedByDay = await Order.aggregate([
+      {
+        $match: {
+          orderStatus: "Dispatched",
+          "products.pharmacyId": pharmacyId // Filter by pharmacyId
+        }
+      },
+      {
+        $addFields: {
+          orderDate: {
+            $dateFromString: {
+              dateString: "$orderDate",
+              format: "%m/%d/%Y, %I:%M:%S %p", // Match the format of your orderDate
+              timezone: "Asia/Colombo" // Adjust timezone if needed
+            }
+          }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            year: { $year: "$orderDate" },
+            month: { $month: "$orderDate" },
+            day: { $dayOfMonth: "$orderDate" }
+          },
+          totalSales: { $sum: "$totalPrice" },
+          totalOrders: { $sum: 1 } // Count the number of orders
+        }
+      },
+      {
+        $sort: { "_id.year": 1, "_id.month": 1, "_id.day": 1 } // Sort by date
+      }
+    ]);
+
+    if (totalSalesDispatchedByDay.length === 0) {
+      return res.status(404).json({ message: 'No sales data found for orders with status "Dispatched" for this pharmacy.' });
+    }
+
+    res.status(200).json(totalSalesDispatchedByDay);
+  } catch (error) {
+    console.error('Error fetching total sales for orders with status "Dispatched" by day for pharmacy:', error);
+    res.status(500).json({ message: 'Internal server error.' });
+  }
+};
