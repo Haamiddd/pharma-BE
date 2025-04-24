@@ -1,6 +1,8 @@
 const Cart = require('../models/cart');
 const asyncHandler = require('express-async-handler')
 const Product = require('../models/product')
+const { v4: uuidv4 } = require('uuid'); // Install uuid library if not already installed
+
 
 //Create new shopping cart
 const createCart = asyncHandler(async (req, res) => {
@@ -16,7 +18,7 @@ const createCart = asyncHandler(async (req, res) => {
         const newCart = new Cart({ userId: userId });
         newCart.products.push(...products);
         const cartCount = await Cart.countDocuments();
-        newCart.cartId = "CID00" + (parseInt(cartCount) + 1);
+        newCart.cartId = newCart.cartId = "CID" + uuidv4().slice(0, 8); // Generate a unique cartId"CID00" + (parseInt(cartCount) + 1);
         const savedCart = await newCart.save();
         res.status(201).json(savedCart);
       }
