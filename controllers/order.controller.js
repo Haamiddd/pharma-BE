@@ -1,5 +1,7 @@
+const { ObjectId } = require("mongodb");
 const Order = require("../models/order.js");
 const bcrypt = require("bcrypt");
+const { default: mongoose } = require("mongoose");
 
 // Create a new order
 exports.addOrder = async (req, res) => {
@@ -151,39 +153,48 @@ exports.getTotalSalesDispatched = async (req, res) => {
 
 exports.getTotalSalesDispatchedByDayForPharmacy = async (req, res) => {
   try {
-    const { pharmacyId } = req.params;
+    const pharmacyId = new mongoose.Types.ObjectId(req.params.pharmacyId);
 
     const totalSalesDispatchedByDay = await Order.aggregate([
       {
-        $match: {
-          orderStatus: "Dispatched",
-          "products.pharmacyId": pharmacyId // Filter by pharmacyId
+        '$match': {
+          'orderStatus': 'Dispatched', 
+          'products.pharmacyId': pharmacyId
         }
-      },
-      {
-        $addFields: {
-          orderDate: {
-            $dateFromString: {
-              dateString: "$orderDate",
-              format: "%m/%d/%Y, %I:%M:%S %p", // Match the format of your orderDate
-              timezone: "Asia/Colombo" // Adjust timezone if needed
+      }, {
+        '$addFields': {
+          'orderDate': {
+            '$dateFromString': {
+              'dateString': '$orderDate'
             }
           }
         }
-      },
-      {
-        $group: {
-          _id: {
-            year: { $year: "$orderDate" },
-            month: { $month: "$orderDate" },
-            day: { $dayOfMonth: "$orderDate" }
-          },
-          totalSales: { $sum: "$totalPrice" },
-          totalOrders: { $sum: 1 } // Count the number of orders
+      }, {
+        '$group': {
+          '_id': {
+            'year': {
+              '$year': '$orderDate'
+            }, 
+            'month': {
+              '$month': '$orderDate'
+            }, 
+            'day': {
+              '$dayOfMonth': '$orderDate'
+            }
+          }, 
+          'totalSales': {
+            '$sum': '$totalPrice'
+          }, 
+          'totalOrders': {
+            '$sum': 1
+          }
         }
-      },
-      {
-        $sort: { "_id.year": 1, "_id.month": 1, "_id.day": 1 } // Sort by date
+      }, {
+        '$sort': {
+          '_id.year': 1, 
+          '_id.month': 1, 
+          '_id.day': 1
+        }
       }
     ]);
 
