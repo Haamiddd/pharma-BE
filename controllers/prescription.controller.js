@@ -142,3 +142,30 @@ exports.getPrescriptionCount = async (req, res) => {
     });
   }
 };
+
+
+exports.changeStatus = async (req, res) => {
+  try {
+    const prescriptionId = req.params.id;
+    const { status } = req.body;
+
+    if (!status) {
+      return res.status(400).json({ error: "Status is required" });
+    }
+
+    const updatedPrescription = await Prescription.findByIdAndUpdate(
+      prescriptionId,
+      { status },
+      { new: true }
+    );
+
+    if (!updatedPrescription) {
+      return res.status(404).json({ error: "Prescription not found" });
+    }
+
+    res.status(200).json(updatedPrescription);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Something went wrong" });
+  }
+};
