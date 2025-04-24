@@ -10,7 +10,7 @@ router.get("/getprescriptioncount/:pharmacyId", prescriptionController.getPrescr
 router.get("/", prescriptionController.getAllPrescriptions);
 router.get("/:id", prescriptionController.getPrescriptionById);
 router.get('/pharmacy/:pharmacyId', prescriptionController.getPrescriptionsByPharmacy);
-router.put("/prescription/:id/status", prescriptionController.changeStatus);
+router.put("/prescription/:id", prescriptionController.changeStatus);
 
 
 
